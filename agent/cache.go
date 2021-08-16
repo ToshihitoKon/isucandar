@@ -20,7 +20,6 @@ var (
 		206: true,
 		300: true,
 		301: true,
-		304: true,
 		404: true,
 		405: true,
 		410: true,
@@ -44,6 +43,11 @@ type Cache struct {
 }
 
 func newCache(res *http.Response, cachedBody []byte) (*Cache, error) {
+	if res.StatusCode == 304 {
+		res.Body = ioutil.NopCloser(bytes.NewReader(cachedBody))
+		return nil, nil
+	}
+
 	// Do not cache request without get method
 	if res.Request.Method != http.MethodGet {
 		return nil, nil
@@ -138,10 +142,6 @@ func (c *Cache) Body() []byte {
 }
 
 func (c *Cache) apply(req *http.Request) {
-	if c.requiresRevalidate(req) {
-		return
-	}
-
 	if c.LastModified != nil {
 		req.Header.Set("If-Modified-Since", c.LastModified.Format(http.TimeFormat))
 	}
