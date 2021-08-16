@@ -138,6 +138,10 @@ func (c *Cache) Body() []byte {
 }
 
 func (c *Cache) apply(req *http.Request) {
+	if c.requiresRevalidate(req) {
+		return
+	}
+
 	if c.LastModified != nil {
 		req.Header.Set("If-Modified-Since", c.LastModified.Format(http.TimeFormat))
 	}
