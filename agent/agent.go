@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -110,6 +111,9 @@ func (a *Agent) Do(ctx context.Context, req *http.Request) (*http.Response, erro
 	} else {
 		res, err = a.HttpClient.Do(req)
 		if err != nil {
+			if strings.Contains(err.Error(), "http2: server sent GOAWAY") && strings.Contains(err.Error(), "ErrCode=NO_ERROR") && req.Method == http.MethodGet {
+				return a.Do(ctx, req)
+			}
 			return nil, err
 		}
 
