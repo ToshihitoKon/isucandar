@@ -58,13 +58,13 @@ func TestAgent(t *testing.T) {
 }
 
 func TestAgentClearCookie(t *testing.T) {
-	agent, err := NewAgent(WithBaseURL("http://example.com/"))
+	agent, err := NewAgent(WithBaseURL("http://example.com/"), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	agent.HttpClient.Jar.SetCookies(agent.BaseURL, []*http.Cookie{
-		&http.Cookie{},
+		{},
 	})
 	if len(agent.HttpClient.Jar.Cookies(agent.BaseURL)) != 1 {
 		t.Fatal("Set cookie failed")
@@ -76,7 +76,7 @@ func TestAgentClearCookie(t *testing.T) {
 }
 
 func TestAgentNewRequest(t *testing.T) {
-	agent, err := NewAgent()
+	agent, err := NewAgent(WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -96,7 +96,7 @@ func TestAgentRequest(t *testing.T) {
 	srv := newHTTPServer()
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -120,7 +120,7 @@ func TestAgentRequest(t *testing.T) {
 }
 
 func TestAgentMethods(t *testing.T) {
-	agent, err := NewAgent()
+	agent, err := NewAgent(WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}

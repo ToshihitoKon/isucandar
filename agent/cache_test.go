@@ -42,7 +42,7 @@ func TestCacheCondition(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func TestCacheWithLastModified(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,7 +165,7 @@ func TestCacheWithETag(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +239,7 @@ func TestCacheWithMaxAge(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -285,7 +285,7 @@ func TestCacheWithExpires(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -331,7 +331,7 @@ func TestCacheWithVary(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -369,7 +369,7 @@ func TestCacheWithClear(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -393,7 +393,7 @@ func BenchmarkCacheWithMaxAge(b *testing.B) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		b.Fatal(err)
 	}

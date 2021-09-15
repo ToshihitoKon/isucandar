@@ -49,7 +49,7 @@ func TestHTMLParse(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestHTMLParse(t *testing.T) {
 	}
 
 	if len(resources) != 12 {
-		for k, _ := range resources {
+		for k := range resources {
 			t.Log(k)
 		}
 		t.Fatalf("resouces count missmatch: %d", len(resources))
@@ -101,7 +101,7 @@ func BenchmarkHTMLParse(b *testing.B) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		b.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func BenchmarkHTMLParse(b *testing.B) {
 		}
 
 		if len(resources) != 12 {
-			for k, _ := range resources {
+			for k := range resources {
 				b.Log(k)
 			}
 			b.Fatalf("resouces count missmatch: %d", len(resources))
@@ -163,7 +163,7 @@ func TestFavicon(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}

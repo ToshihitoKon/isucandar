@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"github.com/isucon/isucandar/failure"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNoCookie(t *testing.T) {
-	agent, err := NewAgent(WithNoCookie())
+	agent, err := NewAgent(WithNoCookie(), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +24,7 @@ func TestNoCookie(t *testing.T) {
 }
 
 func TestNoCache(t *testing.T) {
-	agent, err := NewAgent(WithNoCache())
+	agent, err := NewAgent(WithNoCache(), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +35,7 @@ func TestNoCache(t *testing.T) {
 }
 
 func TestUserAgent(t *testing.T) {
-	agent, err := NewAgent(WithUserAgent("Hello"))
+	agent, err := NewAgent(WithUserAgent("Hello"), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +46,7 @@ func TestUserAgent(t *testing.T) {
 }
 
 func TestBaseURL(t *testing.T) {
-	agent, err := NewAgent(WithBaseURL("http://base.example.com"))
+	agent, err := NewAgent(WithBaseURL("http://base.example.com"), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +68,7 @@ func TestTimeout(t *testing.T) {
 		go srv.Close()
 	}()
 
-	agent, err := NewAgent(WithTimeout(1*time.Microsecond), WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithTimeout(1*time.Microsecond), WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,4 +78,40 @@ func TestTimeout(t *testing.T) {
 	if ok := failure.As(err, &nerr); !ok || !nerr.Timeout() {
 		t.Fatalf("expected timeout error: %+v", err)
 	}
+}
+
+func TestWithoutTransport(t *testing.T) {
+	_, err := NewAgent()
+	assert.NotNil(t, err)
+	if err != nil {
+		assert.Same(t, ErrTransportInvalid, err)
+	}
+}
+
+func TestDefaultTransport(t *testing.T) {
+	agent1, err := NewAgent(WithDefaultTransport())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	agent2, err := NewAgent(WithDefaultTransport())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Same(t, agent1.HttpClient.Transport, agent2.HttpClient.Transport)
+}
+
+func TestCloneTransport(t *testing.T) {
+	agent1, err := NewAgent(WithCloneTransport(DefaultTransport))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	agent2, err := NewAgent(WithCloneTransport(DefaultTransport))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.NotSame(t, agent1.HttpClient.Transport, agent2.HttpClient.Transport)
 }
