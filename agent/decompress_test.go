@@ -91,7 +91,7 @@ func TestBrotliResponse(t *testing.T) {
 	srv := newCompressHTTPServer()
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -134,7 +134,7 @@ func TestGzipResponse(t *testing.T) {
 	srv := newCompressHTTPServer()
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -178,7 +178,7 @@ func TestDeflateResponse(t *testing.T) {
 	srv := newCompressHTTPServer()
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -228,7 +228,7 @@ func TestWithEcho(t *testing.T) {
 	srv := httptest.NewServer(e)
 	defer srv.Close()
 
-	agent, err := NewAgent(WithBaseURL(srv.URL))
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}

@@ -3,6 +3,7 @@ package agent
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -24,6 +25,10 @@ var (
 
 	DefaultDialer    *net.Dialer
 	DefaultTransport *http.Transport
+)
+
+var (
+	ErrTransportInvalid = errors.New("Specify transport option(WithCloneTransport or WithDefaultTransport)")
 )
 
 func init() {
@@ -70,7 +75,7 @@ func NewAgent(opts ...AgentOption) (*Agent, error) {
 		CacheStore:    NewCacheStore(),
 		HttpClient: &http.Client{
 			CheckRedirect: useLastResponse,
-			Transport:     DefaultTransport,
+			Transport:     nil,
 			Jar:           jar,
 			Timeout:       DefaultRequestTimeout,
 		},
@@ -80,6 +85,10 @@ func NewAgent(opts ...AgentOption) (*Agent, error) {
 		if err := opt(agent); err != nil {
 			return nil, err
 		}
+	}
+
+	if agent.HttpClient.Transport == nil {
+		return nil, ErrTransportInvalid
 	}
 
 	return agent, nil

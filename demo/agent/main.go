@@ -11,7 +11,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	agent, err := agent.NewAgent(agent.WithBaseURL("https://github.com/"))
+	agent, err := agent.NewAgent(agent.WithDefaultTransport(), agent.WithBaseURL("https://github.com/"))
 	if err != nil {
 		panic(err)
 	}

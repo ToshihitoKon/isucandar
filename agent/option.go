@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"net/http"
 	"net/url"
 	"time"
 )
@@ -37,6 +38,22 @@ func WithBaseURL(base string) AgentOption {
 func WithTimeout(d time.Duration) AgentOption {
 	return func(a *Agent) error {
 		a.HttpClient.Timeout = d
+		return nil
+	}
+}
+
+func WithDefaultTransport() AgentOption {
+	return func(a *Agent) error {
+		a.HttpClient.Transport = DefaultTransport
+
+		return nil
+	}
+}
+
+func WithCloneTransport(trs *http.Transport) AgentOption {
+	return func(a *Agent) error {
+		a.HttpClient.Transport = trs.Clone()
+
 		return nil
 	}
 }

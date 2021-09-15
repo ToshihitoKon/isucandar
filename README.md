@@ -20,7 +20,7 @@ isucandar は [ISUCON](http://isucon.net/) などの負荷試験で使える機�
 // NewAgent の引数には可変長で func(*Agent) error な関数を渡せます。
 // その中で Agent の初期設定を完了させてください。
 // 簡易につかえるように、いくつかの AgentOption を返す関数が用意されています。
-agent, err := NewAgent(WithBaseURL("http://isucon.net"))
+agent, err := NewAgent(WithBaseURL("http://isucon.net"), WithDefaultTransport())
 
 // 通常の http.NewRequest のように呼び出せます。
 req, err := agent.NewRequest(http.MethodGet, "/", nil)
@@ -52,10 +52,18 @@ resources, err := agent.ProcessHTML(context.TODO(), req, req.Body)
 // Agent は CacheStore を持ち、それを利用してブラウザに似せた Conditinal GET や、
 // キャッシュを利用して、メモリからレスポンスを復元したりします。
 // もし Cache が必要ないようであれば、 WithNoCache() を NewAgent の引数へ渡してください。
-agent, _ := NewAgent(WithNoCache())
+agent, _ := NewAgent(WithNoCache(), WithDefaultTransport())
 
 // また、なんらかの理由でキャッシュをクリアしたくなった場合は agent.CacheStore.Clear() で削除できます。
 agent.CacheStore.Clear()
+
+//// Transport
+// Agent は HTTPClient とその Transport を持ちます。
+// TCP 接続単位で共有を拒否したい場合は WithCloneTransport(DefaultTransport) などを利用し、
+// 接続が共有されても構わない場合は WithDefatultTransport() を利用してください。
+agent, _ := NewAgent(WithDefaultTransport())
+// or
+agent, _ := NewAgent(WithCloneTransport(DefaultTransport));
 ```
 
 #### 補足
