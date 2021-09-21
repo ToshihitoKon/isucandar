@@ -16,6 +16,7 @@ type Score struct {
 	DefaultScoreMagnification int64
 
 	mu     sync.RWMutex
+	cmu    sync.RWMutex
 	total  sumTable
 	count  int32
 	queue  chan ScoreTag
@@ -27,6 +28,7 @@ func NewScore(ctx context.Context) *Score {
 		Table:                     make(ScoreTable),
 		DefaultScoreMagnification: 0,
 		mu:                        sync.RWMutex{},
+		cmu:                       sync.RWMutex{},
 		total:                     make(sumTable),
 		count:                     0,
 		queue:                     make(chan ScoreTag),
@@ -71,7 +73,9 @@ func (s *Score) Add(tag ScoreTag) {
 	defer func() { recover() }()
 
 	if atomic.CompareAndSwapUint32(&s.closed, 0, 0) {
+		s.cmu.RLock()
 		s.queue <- tag
+		s.cmu.RUnlock()
 		atomic.AddInt32(&s.count, 1)
 	}
 }
@@ -79,7 +83,9 @@ func (s *Score) Add(tag ScoreTag) {
 func (s *Score) Close() {
 	if atomic.CompareAndSwapUint32(&s.closed, 0, 1) {
 		atomic.AddInt32(&s.count, 1)
+		s.cmu.Lock()
 		close(s.queue)
+		s.cmu.Unlock()
 	}
 }
 
