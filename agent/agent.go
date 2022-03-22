@@ -28,7 +28,8 @@ var (
 )
 
 var (
-	ErrTransportInvalid = errors.New("Specify transport option(WithCloneTransport or WithDefaultTransport)")
+	ErrTransportInvalid       = errors.New("Specify transport option(WithCloneTransport or WithDefaultTransport)")
+	ErrUnknownContentEncoding = errors.New("Unknown content encoding")
 )
 
 func init() {

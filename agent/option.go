@@ -43,8 +43,12 @@ func WithTimeout(d time.Duration) AgentOption {
 }
 
 func WithDefaultTransport() AgentOption {
+	return WithTransport(DefaultTransport)
+}
+
+func WithTransport(trs *http.Transport) AgentOption {
 	return func(a *Agent) error {
-		a.HttpClient.Transport = DefaultTransport
+		a.HttpClient.Transport = trs
 
 		return nil
 	}

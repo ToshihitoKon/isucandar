@@ -102,6 +102,17 @@ func TestDefaultTransport(t *testing.T) {
 	assert.Same(t, agent1.HttpClient.Transport, agent2.HttpClient.Transport)
 }
 
+func TestTransport(t *testing.T) {
+	trs := DefaultTransport.Clone()
+
+	agent1, err := NewAgent(WithTransport(trs))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Same(t, agent1.HttpClient.Transport, trs)
+}
+
 func TestCloneTransport(t *testing.T) {
 	agent1, err := NewAgent(WithCloneTransport(DefaultTransport))
 	if err != nil {
