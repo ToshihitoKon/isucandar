@@ -5,6 +5,7 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"context"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -77,6 +78,41 @@ func newCompressHTTPServer() *httptest.Server {
 	r.GET("/broken-deflate", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		w.Header().Set("Content-Type", "text/plain")
 		w.Header().Set("Content-Encoding", "deflate")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Transfer-Encoding", "chunked")
+		w.WriteHeader(200)
+		io.WriteString(w, "test it")
+	})
+	r.GET("/identity", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Encoding", "identity")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Transfer-Encoding", "chunked")
+		w.WriteHeader(200)
+		io.WriteString(w, "test it")
+	})
+	r.GET("/multiple", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		gw := gzip.NewWriter(w)
+		defer gw.Close()
+
+		fw, err := flate.NewWriter(gw, 9)
+		if err != nil {
+			io.WriteString(w, err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer fw.Close()
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Encoding", "deflate, gzip")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Transfer-Encoding", "chunked")
+		w.WriteHeader(200)
+		io.WriteString(fw, "test it")
+	})
+	r.GET("/unknown", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set("Content-Encoding", "unknown")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Transfer-Encoding", "chunked")
 		w.WriteHeader(200)
@@ -214,6 +250,98 @@ func TestDeflateResponse(t *testing.T) {
 	body, err = ioutil.ReadAll(res.Body)
 	if err == nil {
 		t.Fatalf("Not raised error with broken encoding")
+	}
+}
+
+func TestIdentityResponse(t *testing.T) {
+	srv := newCompressHTTPServer()
+	defer srv.Close()
+
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	req, err := agent.GET("/identity")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	res, err := agent.Do(context.Background(), req)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if res.StatusCode != 200 {
+		t.Fatalf("%#v", res)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if bytes.Compare(body, []byte("test it")) != 0 {
+		t.Fatalf("%s missmatch %s", body, "test it")
+	}
+}
+
+func TestMultipleResponse(t *testing.T) {
+	srv := newCompressHTTPServer()
+	defer srv.Close()
+
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	req, err := agent.GET("/multiple")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	res, err := agent.Do(context.Background(), req)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if res.StatusCode != 200 {
+		t.Fatalf("%#v", res)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if bytes.Compare(body, []byte("test it")) != 0 {
+		t.Fatalf("%s missmatch %s", body, "test it")
+	}
+}
+
+func TestUnknownResponse(t *testing.T) {
+	srv := newCompressHTTPServer()
+	defer srv.Close()
+
+	agent, err := NewAgent(WithBaseURL(srv.URL), WithDefaultTransport())
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	req, err := agent.GET("/unknown")
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	_, err = agent.Do(context.Background(), req)
+	if err == nil {
+		t.Fatalf("expected error but err is nil, %+v", err)
+	} else {
+		if !errors.Is(err, ErrUnknownContentEncoding) {
+			t.Fatalf("%+v", err)
+		}
 	}
 }
 
