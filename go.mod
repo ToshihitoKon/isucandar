@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/andybalholm/brotli v1.0.0
 	github.com/dsnet/compress v0.0.1
+	github.com/isucon/isucandar v0.0.0-00010101000000-000000000000
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/pquerna/cachecontrol v0.1.0
@@ -28,3 +29,5 @@ require (
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
+
+replace github.com/isucon/isucandar => ../isucandar
