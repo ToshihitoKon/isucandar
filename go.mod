@@ -1,4 +1,4 @@
-module github.com/isucon/isucandar
+module github.com/ToshihitoKon/isucandar
 
 go 1.18
 
